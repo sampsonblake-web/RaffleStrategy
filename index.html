@@ -2,40 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NSC | Raffle Strategy Pro</title>
+    <title>NSC | Raffle Strategy Report</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
         :root { --primary: #2e7dff; --secondary: #5aa0ff; --success: #d4f4dd; --text: #111; }
+        
+        /* General Styles */
         body { font-family: -apple-system, system-ui, sans-serif; background: #f4f7fb; margin: 0; padding: 1rem; color: var(--text); }
         .app-shell { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #eee; }
         .header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; padding: 1.5rem; text-align: center; }
         .brand { font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; margin-bottom: 4px; }
         .title { font-size: 1.25rem; font-weight: 700; margin: 0; }
+        .report-only { display: none; } /* Hidden on web, shown on PDF */
+
         .content { padding: 1.25rem; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .input-group { margin-bottom: 12px; }
         label { display: block; font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 4px; }
         input { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; box-sizing: border-box; }
-        button { width: 100%; padding: 0.9rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        
+        button { width: 100%; padding: 0.9rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         #generateBtn { background: var(--primary); color: white; margin-top: 5px; }
         #printBtn { background: #f0f4ff; color: var(--primary); margin-top: 15px; font-size: 0.8rem; }
-        .table-container { overflow-x: auto; margin-top: 20px; border-radius: 8px; border: 1px solid #eee; }
+
+        .table-container { overflow-x: auto; margin-top: 20px; border-radius: 12px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { background: #f8f9fa; padding: 10px; text-align: left; }
-        td { padding: 10px; border-top: 1px solid #eee; }
-        tr.meet-target td { background-color: var(--success) !important; }
+        th { background: #f8f9fa; padding: 12px; text-align: left; color: #444; }
+        td { padding: 12px; border-top: 1px solid #eee; }
+        
+        /* Success Row Highlight */
+        tr.meet-target td { background-color: var(--success) !important; font-weight: 600; }
+        
         .chart-container { position: relative; height: 300px; margin-top: 20px; }
         .footer { text-align: center; padding: 1rem; font-size: 0.7rem; color: #aaa; }
 
+        /* THE PDF "POP" FIX */
         @media print {
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            /* Force background colors and gradients */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+            
             body { background: white !important; padding: 0; }
-            .app-shell { box-shadow: none; max-width: 100%; border: none; }
-            .header { background: linear-gradient(135deg, #2e7dff, #5aa0ff) !important; color: white !important; }
-            button, .input-group, .grid { display: none !important; }
-            .chart-container { height: 450px; width: 100%; }
+            .app-shell { box-shadow: none; max-width: 100%; border: none; width: 100%; }
+            
+            /* Show report header, hide app UI */
+            .report-only { display: block; margin-top: 10px; font-size: 0.9rem; opacity: 0.9; font-weight: 400; }
+            button, .input-group, .grid, #printBtn { display: none !important; }
+            
+            .header { padding: 2rem 1rem !important; background: linear-gradient(135deg, #2e7dff, #5aa0ff) !important; }
+            .chart-container { height: 400px; width: 100%; margin-top: 30px; }
+            .table-container { border: 1px solid #ddd; }
+            th { background: #f0f4ff !important; }
         }
     </style>
 </head>
@@ -45,27 +63,41 @@
     <div class="header">
         <div class="brand">National Sporting Companies</div>
         <h1 class="title">🎟️ Raffle Ticket Strategy</h1>
+        <div class="report-only">Prepared Strategy Analysis & Revenue Projections</div>
     </div>
+
     <div class="content">
         <div class="grid">
-            <div class="input-group"><label>Bid / Cost ($)</label><input type="number" id="cost" placeholder="0"></div>
-            <div class="input-group"><label>Target Profit ($)</label><input type="number" id="targetProfit" placeholder="0"></div>
+            <div class="input-group"><label>Bid / Cost ($)</label><input type="number" id="cost" placeholder="e.g. 500"></div>
+            <div class="input-group"><label>Target Profit ($)</label><input type="number" id="targetProfit" placeholder="e.g. 1000"></div>
         </div>
         <div class="grid">
             <div class="input-group"><label>Min Price ($)</label><input type="number" id="minPrice" value="10"></div>
             <div class="input-group"><label>Price Step ($)</label><input type="number" id="priceStep" value="10"></div>
         </div>
         <button id="generateBtn">Calculate Strategy</button>
+
         <div class="table-container">
             <table id="strategyTable">
-                <thead><tr><th>Price</th><th>Qty</th><th>Revenue</th><th>Margin</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Ticket Price</th>
+                        <th>Qty Needed</th>
+                        <th>Gross Revenue</th>
+                        <th>Margin</th>
+                    </tr>
+                </thead>
                 <tbody></tbody>
             </table>
         </div>
-        <div class="chart-container"><canvas id="strategyChart"></canvas></div>
+
+        <div class="chart-container">
+            <canvas id="strategyChart"></canvas>
+        </div>
+
         <button id="printBtn">📄 Export Strategy PDF</button>
     </div>
-    <div class="footer">Confidential Strategy Tool • NSC 2026</div>
+    <div class="footer">National Sporting Companies • Internal Use Only</div>
 </div>
 
 <script>
@@ -75,6 +107,7 @@ function updateDashboard() {
     const target = parseFloat(document.getElementById('targetProfit').value) || 0;
     const min = parseFloat(document.getElementById('minPrice').value) || 1;
     const step = parseFloat(document.getElementById('priceStep').value) || 1;
+    
     const tableBody = document.querySelector("#strategyTable tbody");
     tableBody.innerHTML = "";
     const labels = [], ticketData = [];
@@ -88,9 +121,13 @@ function updateDashboard() {
         
         labels.push("$" + price);
         ticketData.push(qty);
-        tableBody.innerHTML += `<tr class="${profit >= target && rev > 0 ? 'meet-target' : ''}">
-            <td><strong>$${price}</strong></td><td>${qty}</td>
-            <td>$${rev.toLocaleString()}</td><td>${margin}%</td>
+
+        const isTargetMet = profit >= target && rev > 0;
+        tableBody.innerHTML += `<tr class="${isTargetMet ? 'meet-target' : ''}">
+            <td><strong>$${price}</strong></td>
+            <td>${qty}</td>
+            <td>$${rev.toLocaleString()}</td>
+            <td>${margin}%</td>
         </tr>`;
     }
 
@@ -101,24 +138,45 @@ function updateDashboard() {
         data: {
             labels: labels,
             datasets: [{
+                label: 'Tickets to Sell',
                 data: ticketData,
                 borderColor: '#2e7dff',
                 backgroundColor: 'rgba(46,125,255,0.1)',
                 fill: true,
                 tension: 0.4,
-                datalabels: { align: 'top', anchor: 'end', color: '#2e7dff', font: { weight: 'bold' } }
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#2e7dff',
+                pointRadius: 5,
+                datalabels: { 
+                    align: 'top', 
+                    anchor: 'end', 
+                    color: '#2e7dff', 
+                    font: { weight: 'bold', size: 12 },
+                    formatter: (v) => v + " tix"
+                }
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, title: { display: true, text: 'Tickets to Sell' } } }
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    grid: { display: false },
+                    title: { display: true, text: 'Ticket Volume' } 
+                },
+                x: { grid: { display: false } }
+            }
         }
     });
 }
+
 document.getElementById('generateBtn').addEventListener('click', updateDashboard);
 document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+// Initial call
 updateDashboard();
 </script>
 </body>
