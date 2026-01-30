@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <style>
 body {font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f7fb;margin:0;padding:1rem;color:#111;}
+.print-container {width:100%;} /* wrapper for print centering */
 .app-shell {max-width:480px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.15);overflow:hidden;}
 .header {background:linear-gradient(135deg,#2e7dff,#5aa0ff);color:#fff;padding:1rem;text-align:center;}
 .brand {font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;opacity:0.9;}
@@ -28,59 +29,68 @@ canvas {margin-top:0.5rem;}
 
 /* Print styles */
 @media print {
-  @page {size: landscape; margin:0;}
+  @page { size: landscape; margin:0; }
   body, html {
     background:#fff;
     padding:0 !important;
     margin:0 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    transform: scale(0.93);
-    transform-origin: top left;
   }
-  .app-shell, .content {
+  .print-container {
+    display: flex;
+    justify-content: center; /* horizontal centering */
+    align-items: center;     /* vertical centering */
+    height: 100vh;           /* full page height */
+  }
+  .app-shell {
+    transform: none !important;
+    max-width: 95%;
+    width: auto;
     padding:0 !important;
     margin:0 !important;
   }
   button {display:none;}
-  table {font-size:0.75rem; margin:0 0 0.3rem 0 !important;}
+  table {font-size:0.75rem; margin:0 0 0.3rem 0 !important;} 
   canvas {width:100% !important; height:400px !important;}
   .header, .footer {font-size:0.85rem; padding:0.3rem;}
 }
 </style>
 </head>
 <body>
-<div class="app-shell">
-  <div class="header">
-    <div class="brand">National Sporting Companies</div>
-    <div class="title">🎟️ Raffle Ticket Strategy Dashboard</div>
-  </div>
-  <div class="content">
-    <label>Bid / Cost ($)
-      <input type="number" id="cost" value="0" inputmode="decimal">
-    </label>
-    <label>Target Profit ($)
-      <input type="number" id="targetProfit" value="0" inputmode="decimal">
-    </label>
-    <button id="generateBtn">Generate Strategy</button>
+<div class="print-container">
+  <div class="app-shell">
+    <div class="header">
+      <div class="brand">National Sporting Companies</div>
+      <div class="title">🎟️ Raffle Ticket Strategy Dashboard</div>
+    </div>
+    <div class="content">
+      <label>Bid / Cost ($)
+        <input type="number" id="cost" value="0" inputmode="decimal">
+      </label>
+      <label>Target Profit ($)
+        <input type="number" id="targetProfit" value="0" inputmode="decimal">
+      </label>
+      <button id="generateBtn">Generate Strategy</button>
 
-    <table id="strategyTable">
-      <thead>
-        <tr>
-          <th>Ticket Price</th>
-          <th>Tickets Needed</th>
-          <th>Revenue</th>
-          <th>Profit</th>
-          <th>Margin</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+      <table id="strategyTable">
+        <thead>
+          <tr>
+            <th>Ticket Price</th>
+            <th>Tickets Needed</th>
+            <th>Revenue</th>
+            <th>Profit</th>
+            <th>Margin</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
 
-    <canvas id="strategyChart" height="400"></canvas>
-    <button id="printBtn">Print Chart / PDF</button>
+      <canvas id="strategyChart" height="400"></canvas>
+      <button id="printBtn">Print Chart / PDF</button>
+    </div>
+    <div class="footer">Mobile-optimized • National Sporting Companies</div>
   </div>
-  <div class="footer">Mobile-optimized • National Sporting Companies</div>
 </div>
 
 <script>
