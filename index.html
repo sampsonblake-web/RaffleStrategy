@@ -27,9 +27,9 @@ tr.meet-target td {background:#d4f4dd;} /* green highlight for meeting target */
 canvas {margin-top:0.5rem;}
 .footer {text-align:center;padding:0.5rem;font-size:0.7rem;color:#888;border-top:1px solid #eee;}
 
-/* Print styles */
+/* Print styles for portrait */
 @media print {
-  @page { size: landscape; margin:0; }
+  @page { size: portrait; margin:0; }
   body, html {
     background:#fff;
     padding:0 !important;
@@ -40,11 +40,13 @@ canvas {margin-top:0.5rem;}
   .print-container {
     display: flex;
     justify-content: center; /* horizontal centering */
-    align-items: center;     /* vertical centering */
-    height: 100vh;           /* full page height */
+    align-items: flex-start; /* top-align so it fits vertically */
+    height: 100vh;
+    padding-top: 0.5cm; /* small top margin */
   }
   .app-shell {
-    transform: none !important;
+    transform: scale(0.88); /* slightly shrink to fit portrait */
+    transform-origin: top center;
     max-width: 95%;
     width: auto;
     padding:0 !important;
@@ -52,7 +54,7 @@ canvas {margin-top:0.5rem;}
   }
   button {display:none;}
   table {font-size:0.75rem; margin:0 0 0.3rem 0 !important;} 
-  canvas {width:100% !important; height:400px !important;}
+  canvas {width:100% !important; height:300px !important;} /* shorter chart for portrait */
   .header, .footer {font-size:0.85rem; padding:0.3rem;}
 }
 </style>
@@ -86,7 +88,7 @@ canvas {margin-top:0.5rem;}
         <tbody></tbody>
       </table>
 
-      <canvas id="strategyChart" height="400"></canvas>
+      <canvas id="strategyChart" height="300"></canvas>
       <button id="printBtn">Print Chart / PDF</button>
     </div>
     <div class="footer">Mobile-optimized • National Sporting Companies</div>
