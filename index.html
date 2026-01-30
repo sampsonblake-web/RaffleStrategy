@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>National Sporting Companies | Raffle Ticket Strategy Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<style>
+body {font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f7fb;margin:0;padding:1rem;color:#111;}
+.app-shell {max-width:480px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.15);overflow:hidden;}
+.header {background:linear-gradient(135deg,#2e7dff,#5aa0ff);color:#fff;padding:1rem;text-align:center;}
+.brand {font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;opacity:0.9;}
+.title {font-size:1.4rem;margin-top:0.25rem;font-weight:600;}
+.content {padding:1rem;}
+label {display:block;margin-top:0.6rem;font-size:0.85rem;color:#444;}
+input {width:100%;padding:0.7rem;margin-top:0.3rem;border-radius:10px;border:1px solid #ddd;font-size:1.05rem;background:#f9fbff;outline:none;transition:border 0.2s, box-shadow 0.2s;}
+input:focus {border-color:#2e7dff;box-shadow:0 0 0 3px rgba(46,125,255,0.2);background:#fff;}
+button {margin-top:0.8rem;width:100%;padding:0.85rem;background:#2e7dff;color:#fff;font-size:1.05rem;font-weight:600;border:none;border-radius:12px;cursor:pointer;}
+button:hover {background:#5aa0ff;}
+table {width:100%;border-collapse:collapse;margin-top:0.5rem;font-size:0.8rem;}
+th, td {padding:0.25rem;text-align:center;border-bottom:1px solid #ddd;} 
+th {background:#f0f4ff;}
+td {font-weight:600;}
+tr.meet-target td {background:#d4f4dd;} /* green highlight for meeting target */
+canvas {margin-top:0.5rem;}
+.footer {text-align:center;padding:0.5rem;font-size:0.7rem;color:#888;border-top:1px solid #eee;}
+
+/* Print styles */
+@media print {
+  @page {size: landscape; margin:0.5cm;}
+  body {background:#fff;padding:0;}
+  .app-shell {max-width:100%;box-shadow:none;border-radius:0;margin:0;padding:0;}
+  .content {padding:0.3rem;}
+  button {display:none;}
+  table {font-size:0.75rem; margin-bottom:0.3rem;} 
+  canvas {width:100% !important;height:500px !important;} 
+  .header,.footer {font-size:0.85rem;padding:0.3rem;}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div class="header">
+    <div class="brand">National Sporting Companies</div>
+    <div class="title">🎟️ Raffle Ticket Strategy Dashboard</div>
+  </div>
+  <div class="content">
+    <label>Bid / Cost ($)
+      <input type="number" id="cost" value="0" inputmode="decimal">
+    </label>
+    <label>Target Profit ($)
+      <input type="number" id="targetProfit" value="0" inputmode="decimal">
+    </label>
+    <button id="generateBtn">Generate Strategy</button>
+
+    <table id="strategyTable">
+      <thead>
+        <tr>
+          <th>Ticket Price</th>
+          <th>Tickets Needed</th>
+          <th>Revenue</th>
+          <th>Profit</th>
+          <th>Margin</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <canvas id="strategyChart" height="200"></canvas>
+    <button id="printBtn">Print Chart / PDF</button>
+  </div>
+  <div class="footer">Mobile-optimized • National Sporting Companies</div>
+</div>
+
+<script>
+const costInput = document.getElementById("cost");
+const targetProfitInput = document.getElementById("targetProfit");
+const tableBody = document.querySelector("#strategyTable tbody");
+const generateBtn = document.getElementById("generateBtn");
+const printBtn = document.getElementById("printBtn");
+let chart;
+
+function formatMoney(value){return "$"+value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g,"$&,");}
+
+generateBtn.addEventListener("click", () => {
+  const cost = parseFloat(costInput.value);
+  const targetProfit = parseFloat(targetProfitInput.value);
+  if (isNaN(cost) || isNaN(targetProfit)) return;
+
+  tableBody.innerHTML = "";
+  const prices = [10,20,30,40,50];
+  const ticketsNeeded = [];
+
+  prices.forEach(price => {
+    const tickets = Math.ceil((cost + targetProfit)/price);
+    const revenue = tickets * price;
+    const profit = revenue - cost;
+    const margin = Math.round((profit / revenue) * 100);
+    const rowClass = profit >= targetProfit ? 'meet-target' : '';
+    tableBody.innerHTML += `<tr class="${rowClass}">
+      <td>$${price}</td>
+      <td>${tickets}</td>
+      <td>${formatMoney(revenue)}</td>
+      <td>${formatMoney(profit)}</td>
+      <td>${margin}%</td>
+    </tr>`;
+    ticketsNeeded.push(tickets);
+  });
+
+  Chart.register(ChartDataLabels);
+
+  if(chart) chart.destroy();
+  const ctx = document.getElementById('strategyChart').getContext('2d');
+  chart = new Chart(ctx, {
+    plugins:[ChartDataLabels],
+    type:'line',
+    data:{
+      labels: prices.map(p=>"$"+p),
+      datasets:[
+        {
+          label:'Tickets Needed',
+          data:ticketsNeeded,
+          borderColor:'#2e7dff',
+          backgroundColor:'rgba(46,125,255,0.1)',
+          yAxisID:'y',
+          tension:0.3,
+          fill:true,
+          borderWidth:3,
+          datalabels:{
+            display:true,
+            color:'#2e7dff',
+            anchor:'end',
+            align:'top',
+            font: ctx=> window.matchMedia('print').matches?{weight:'bold',size:14}:{weight:'bold',size:12},
+            formatter: value=>value
+          }
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      interaction:{mode:'index', intersect:false},
+      stacked:false,
+      plugins:{datalabels:{font:{weight:'bold'}}},
+      scales:{
+        x:{ticks:{padding:15,font:ctx=>window.matchMedia('print').matches?{size:14}:{size:12}}},
+        y:{type:'linear',position:'left',title:{display:true,text:'Tickets Needed',font:ctx=>window.matchMedia('print').matches?{size:14}:{size:12}}}
+      }
+    }
+  });
+});
+
+printBtn.addEventListener("click",()=>{window.print();});
+</script>
+</body>
+</html>
