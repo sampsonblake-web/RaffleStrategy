@@ -40,13 +40,12 @@ canvas {margin-top:0.5rem;}
   .print-container {
     display: flex;
     justify-content: center; /* horizontal centering */
-    align-items: flex-start; /* top-align so it fits vertically */
+    align-items: flex-start; /* top-align */
     height: 100vh;
-    padding-top: 0.5cm; /* small top margin */
+    padding-top: 0.5cm;
   }
   .app-shell {
-    transform: scale(0.88); /* slightly shrink to fit portrait */
-    transform-origin: top center;
+    /* transform will be set dynamically by JS */
     max-width: 95%;
     width: auto;
     padding:0 !important;
@@ -54,7 +53,7 @@ canvas {margin-top:0.5rem;}
   }
   button {display:none;}
   table {font-size:0.75rem; margin:0 0 0.3rem 0 !important;} 
-  canvas {width:100% !important; height:300px !important;} /* shorter chart for portrait */
+  canvas {width:100% !important; height:300px !important;}
   .header, .footer {font-size:0.85rem; padding:0.3rem;}
 }
 </style>
@@ -173,7 +172,32 @@ generateBtn.addEventListener("click", () => {
   });
 });
 
+// Print button
 printBtn.addEventListener("click",()=>{window.print();});
+
+// Dynamic scaling for print
+function scaleForPrint() {
+  const shell = document.querySelector('.app-shell');
+  shell.style.transform = 'none'; // reset
+
+  const pageHeight = window.innerHeight;
+  const pageWidth = window.innerWidth;
+
+  const shellHeight = shell.offsetHeight;
+  const shellWidth = shell.offsetWidth;
+
+  const heightScale = pageHeight / shellHeight * 0.95;
+  const widthScale = pageWidth / shellWidth * 0.95;
+  const scale = Math.min(heightScale, widthScale, 1);
+
+  shell.style.transform = `scale(${scale})`;
+  shell.style.transformOrigin = 'top center';
+}
+
+window.onbeforeprint = scaleForPrint;
+window.onafterprint = () => {
+  document.querySelector('.app-shell').style.transform = 'none';
+};
 </script>
 </body>
 </html>
