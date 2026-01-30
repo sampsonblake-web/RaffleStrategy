@@ -9,51 +9,57 @@
     <style>
         :root { --primary: #2e7dff; --secondary: #5aa0ff; --success: #d4f4dd; --text: #111; }
         
-        /* General Styles */
-        body { font-family: -apple-system, system-ui, sans-serif; background: #f4f7fb; margin: 0; padding: 1rem; color: var(--text); }
+        body { font-family: -apple-system, system-ui, sans-serif; background: #f4f7fb; margin: 0; padding: 1rem; color: var(--text); -webkit-font-smoothing: antialiased; }
         .app-shell { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #eee; }
+        
         .header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; padding: 1.5rem; text-align: center; }
         .brand { font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; margin-bottom: 4px; }
         .title { font-size: 1.25rem; font-weight: 700; margin: 0; }
-        .report-only { display: none; } /* Hidden on web, shown on PDF */
+        .report-only { display: none; } 
 
         .content { padding: 1.25rem; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .input-group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 4px; }
-        input { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .input-group { margin-bottom: 8px; }
+        label { display: block; font-size: 0.75rem; font-weight: 700; color: #555; margin-bottom: 6px; }
         
-        button { width: 100%; padding: 0.9rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        #generateBtn { background: var(--primary); color: white; margin-top: 5px; }
-        #printBtn { background: #f0f4ff; color: var(--primary); margin-top: 15px; font-size: 0.8rem; }
+        /* Mobile Optimized Inputs */
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 2px solid #edf2f7; 
+            font-size: 1.1rem; /* Prevents iOS zoom-on-focus */
+            box-sizing: border-box; 
+            background: #f8fafc;
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--primary); outline: none; background: #fff; }
+        
+        button { width: 100%; padding: 1rem; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+        #generateBtn { background: var(--primary); color: white; margin-top: 5px; box-shadow: 0 4px 12px rgba(46,125,255,0.3); }
+        #generateBtn:active { transform: translateY(2px); box-shadow: none; }
+        #printBtn { background: #f0f4ff; color: var(--primary); margin-top: 15px; }
 
-        .table-container { overflow-x: auto; margin-top: 20px; border-radius: 12px; border: 1px solid #eee; }
+        .table-container { overflow-x: auto; margin-top: 24px; border-radius: 12px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { background: #f8f9fa; padding: 12px; text-align: left; color: #444; }
+        th { background: #f8f9fa; padding: 12px; text-align: left; color: #444; border-bottom: 2px solid #eee; }
         td { padding: 12px; border-top: 1px solid #eee; }
         
-        /* Success Row Highlight */
-        tr.meet-target td { background-color: var(--success) !important; font-weight: 600; }
+        tr.meet-target td { background-color: var(--success) !important; font-weight: 700; color: #1a4731; }
         
-        .chart-container { position: relative; height: 300px; margin-top: 20px; }
-        .footer { text-align: center; padding: 1rem; font-size: 0.7rem; color: #aaa; }
+        .chart-container { position: relative; height: 300px; margin-top: 24px; }
+        .footer { text-align: center; padding: 1.5rem; font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* THE PDF "POP" FIX */
         @media print {
-            /* Force background colors and gradients */
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-            
             body { background: white !important; padding: 0; }
             .app-shell { box-shadow: none; max-width: 100%; border: none; width: 100%; }
-            
-            /* Show report header, hide app UI */
-            .report-only { display: block; margin-top: 10px; font-size: 0.9rem; opacity: 0.9; font-weight: 400; }
+            .report-only { display: block; margin-top: 8px; font-size: 0.9rem; font-weight: 400; }
             button, .input-group, .grid, #printBtn { display: none !important; }
-            
-            .header { padding: 2rem 1rem !important; background: linear-gradient(135deg, #2e7dff, #5aa0ff) !important; }
-            .chart-container { height: 400px; width: 100%; margin-top: 30px; }
-            .table-container { border: 1px solid #ddd; }
-            th { background: #f0f4ff !important; }
+            .header { padding: 2.5rem 1rem !important; background: linear-gradient(135deg, #2e7dff, #5aa0ff) !important; }
+            .chart-container { height: 450px; width: 100%; margin-top: 40px; }
+            th { background: #f0f4ff !important; border-bottom: 2px solid #2e7dff !important; }
+            td { border-top: 1px solid #eee !important; }
         }
     </style>
 </head>
@@ -62,28 +68,40 @@
 <div class="app-shell">
     <div class="header">
         <div class="brand">National Sporting Companies</div>
-        <h1 class="title">🎟️ Raffle Ticket Strategy</h1>
-        <div class="report-only">Prepared Strategy Analysis & Revenue Projections</div>
+        <h1 class="title">🎟️ Raffle Strategy Dashboard</h1>
+        <div class="report-only">Confidential Strategy Analysis</div>
     </div>
 
     <div class="content">
         <div class="grid">
-            <div class="input-group"><label>Bid / Cost ($)</label><input type="number" id="cost" placeholder="e.g. 500"></div>
-            <div class="input-group"><label>Target Profit ($)</label><input type="number" id="targetProfit" placeholder="e.g. 1000"></div>
+            <div class="input-group">
+                <label>Bid / Cost ($)</label>
+                <input type="number" id="cost" placeholder="0" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>Target Profit ($)</label>
+                <input type="number" id="targetProfit" placeholder="0" inputmode="decimal">
+            </div>
         </div>
         <div class="grid">
-            <div class="input-group"><label>Min Price ($)</label><input type="number" id="minPrice" value="10"></div>
-            <div class="input-group"><label>Price Step ($)</label><input type="number" id="priceStep" value="10"></div>
+            <div class="input-group">
+                <label>Min Price ($)</label>
+                <input type="number" id="minPrice" value="10" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>Price Step ($)</label>
+                <input type="number" id="priceStep" value="10" inputmode="decimal">
+            </div>
         </div>
-        <button id="generateBtn">Calculate Strategy</button>
+        <button id="generateBtn">Update Strategy</button>
 
         <div class="table-container">
             <table id="strategyTable">
                 <thead>
                     <tr>
-                        <th>Ticket Price</th>
-                        <th>Qty Needed</th>
-                        <th>Gross Revenue</th>
+                        <th>Price</th>
+                        <th>Qty</th>
+                        <th>Revenue</th>
                         <th>Margin</th>
                     </tr>
                 </thead>
@@ -95,9 +113,9 @@
             <canvas id="strategyChart"></canvas>
         </div>
 
-        <button id="printBtn">📄 Export Strategy PDF</button>
+        <button id="printBtn">📄 Generate Client PDF</button>
     </div>
-    <div class="footer">National Sporting Companies • Internal Use Only</div>
+    <div class="footer">NSC Internal Strategy Tool • 2026</div>
 </div>
 
 <script>
@@ -125,7 +143,7 @@ function updateDashboard() {
         const isTargetMet = profit >= target && rev > 0;
         tableBody.innerHTML += `<tr class="${isTargetMet ? 'meet-target' : ''}">
             <td><strong>$${price}</strong></td>
-            <td>${qty}</td>
+            <td>${qty.toLocaleString()}</td>
             <td>$${rev.toLocaleString()}</td>
             <td>${margin}%</td>
         </tr>`;
@@ -138,22 +156,22 @@ function updateDashboard() {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Tickets to Sell',
                 data: ticketData,
                 borderColor: '#2e7dff',
                 backgroundColor: 'rgba(46,125,255,0.1)',
                 fill: true,
                 tension: 0.4,
-                borderWidth: 3,
+                borderWidth: 4,
                 pointBackgroundColor: '#fff',
                 pointBorderColor: '#2e7dff',
-                pointRadius: 5,
+                pointBorderWidth: 2,
+                pointRadius: 6,
                 datalabels: { 
                     align: 'top', 
                     anchor: 'end', 
                     color: '#2e7dff', 
-                    font: { weight: 'bold', size: 12 },
-                    formatter: (v) => v + " tix"
+                    font: { weight: 'bold', size: 13 },
+                    formatter: (v) => v.toLocaleString()
                 }
             }]
         },
@@ -162,12 +180,8 @@ function updateDashboard() {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: { 
-                y: { 
-                    beginAtZero: true, 
-                    grid: { display: false },
-                    title: { display: true, text: 'Ticket Volume' } 
-                },
-                x: { grid: { display: false } }
+                y: { beginAtZero: true, grid: { color: '#f0f0f0' }, title: { display: true, text: 'Required Ticket Volume', font: { weight: 'bold' } } },
+                x: { grid: { display: false }, ticks: { font: { weight: 'bold' } } }
             }
         }
     });
@@ -175,8 +189,6 @@ function updateDashboard() {
 
 document.getElementById('generateBtn').addEventListener('click', updateDashboard);
 document.getElementById('printBtn').addEventListener('click', () => window.print());
-
-// Initial call
 updateDashboard();
 </script>
 </body>
